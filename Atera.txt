@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IT Trouble Shooter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+            color: #ffffff;
+        }
+        #game-container {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        .score-board {
+            display: none;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #363636;
+            border-radius: 4px;
+            border: 1px solid #4a4a4a;
+        }
+        .issue-container {
+            border: 1px solid #4a4a4a;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background: #363636;
+            display: none;
+        }
+        .solutions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            background: #2196F3;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        button:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+        .game-over {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #363636;
+            border-radius: 4px;
+            border: 1px solid #4a4a4a;
+            display: none;
+        }
+        #timer {
+            font-weight: bold;
+            color: #ff4444;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #444444;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            border-radius: 5px;
+            width: 100%;
+            transition: width 1s linear;
+        }
+        .intro-screen {
+            text-align: center;
+            padding: 20px;
+        }
+        .prize-info {
+            background: #363636;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #4a4a4a;
+        }
+        .prizes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .prize-tier {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #4a4a4a;
+        }
+        .prize-tier h3 {
+            color: #2196F3;
+            margin: 0 0 10px 0;
+        }
+        .prize-tier p {
+            margin: 0;
+            color: #ffffff;
+        }
+        .start-button {
+            background: #4CAF50;
+            font-size: 1.2em;
+            padding: 15px 30px;
+            margin-top: 20px;
+        }
+        .start-button:hover {
+            background: #45a049;
+        }
+        #game-interface {
+            display: none;
+        }
+        #current-issue {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="intro-screen" class="intro-screen">
+            <h1>🎮 IT Trouble Shooter Challenge</h1>
+            <div class="prize-info">
+                <h2>🏆 Win Awesome Atera Swag!</h2>
+                <div class="prizes">
+                    <div class="prize-tier">
+                        <h3>🥇 300+ Points</h3>
+                        <p>Limited Edition Pink Atera T-Shirt + Cap + Water Bottle</p>
+                    </div>
+                    <div class="prize-tier">
+                        <h3>🥈 200+ Points</h3>
+                        <p>Atera Cap + Water Bottle</p>
+                    </div>
+                    <div class="prize-tier">
+                        <h3>🥉 100+ Points</h3>
+                        <p>Atera Water Bottle</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-interface">
+            <div class="header">
+                <h1>🎮 IT Trouble Shooter</h1>
+                <p>Fix IT issues before time runs out!</p>
+            </div>
+            <div class="score-board">
+                <div>🏆 Score: <span id="score">0</span></div>
+                <div>⏲️ Time: <span id="timer">30</span>s</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="issue-container">
+                <h3 id="current-issue">Loading...</h3>
+                <div class="solutions" id="solutions"></div>
+            </div>
+        </div>
+
+        <div class="game-over" id="game-over">
+            <h2>🏁 Game Over!</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <div id="prize-message"></div>
+            <button onclick="autoStartGame()">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const issues = [
+            {
+                problem: "User reports their computer is running extremely slow",
+                solutions: [
+                    {text: "Check CPU and memory usage in Task Manager", emoji: "🔍"},
+                    {text: "Run malware scan", emoji: "🦠"},
+                    {text: "Delete temporary files", emoji: "🗑️"},
+                    {text: "Install more RAM", emoji: "💾"}
+                ],
+                correct: 0
+            },
+            {
+                problem: "Network connectivity issues reported across multiple workstations",
+                solutions: [
+                    {text: "Reset the router", emoji: "🔄"},
+                    {text: "Check DNS settings", emoji: "🌐"},
+                    {text: "Replace all network cables", emoji: "🔌"},
+                    {text: "Disable firewalls", emoji: "🛡️"}
+                ],
+                correct: 1
+            },
+            {
+                problem: "Printer not responding to print jobs",
+                solutions: [
+                    {text: "Reinstall Windows", emoji: "💻"},
+                    {text: "Clear print queue and restart print spooler", emoji: "🖨️"},
+                    {text: "Buy a new printer", emoji: "💰"},
+                    {text: "Disable antivirus", emoji: "🛡️"}
+                ],
+                correct: 1
+            },
+            {
+                problem: "User cannot access shared network drive",
+                solutions: [
+                    {text: "Format the drive", emoji: "💽"},
+                    {text: "Disable network adapter", emoji: "🔌"},
+                    {text: "Verify network permissions and mapping", emoji: "🔐"},
+                    {text: "Install Linux", emoji: "🐧"}
+                ],
+                correct: 2
+            },
+            {
+                problem: "System shows 'Blue Screen of Death'",
+                solutions: [
+                    {text: "Check recent hardware/software changes", emoji: "🔍"},
+                    {text: "Paint the screen a different color", emoji: "🎨"},
+                    {text: "Delete System32", emoji: "⚠️"},
+                    {text: "Ignore it", emoji: "🙈"}
+                ],
+                correct: 0
+            }
+        ];
+
+        let currentScore = 0;
+        let timeLeft = 30;
+        let gameTimer;
+        let currentIssueIndex;
+
+        function autoStartGame() {
+            document.getElementById('intro-screen').style.display = 'block';
+            document.getElementById('game-interface').style.display = 'none';
+            document.getElementById('game-over').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('intro-screen').classList.add('fade-out');
+                setTimeout(() => {
+                    startGameFromIntro();
+                }, 500);
+            }, 3000);
+        }
+
+        function startGameFromIntro() {
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('intro-screen').classList.remove('fade-out');
+            document.getElementById('game-interface').classList.add('fade-in');
+            document.getElementById('game-interface').style.display = 'block';
+            document.getElementById('game-over').style.display = 'none';
+            
+            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.score-board').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.issue-container').style.display = 'block';
+            
+            startGame();
+        }
+
+        function updateTimer() {
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('progress').style.width = `${(timeLeft/30)*100}%`;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function displayIssue() {
+            currentIssueIndex = Math.floor(Math.random() * issues.length);
+            const issue = issues[currentIssueIndex];
+            
+            document.getElementById('current-issue').textContent = issue.problem;
+            
+            const solutionsContainer = document.getElementById('solutions');
+            solutionsContainer.innerHTML = '';
+            
+            issue.solutions.forEach((solution, index) => {
+                const button = document.createElement('button');
+                button.innerHTML = `${solution.emoji} ${solution.text}`;
+                button.onclick = () => checkAnswer(index);
+                solutionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            const issue = issues[currentIssueIndex];
+            if (selectedIndex === issue.correct) {
+                currentScore += 10;
+                document.getElementById('score').textContent = currentScore;
+                timeLeft = Math.min(timeLeft + 5, 30);
+            } else {
+                timeLeft = Math.max(timeLeft - 5, 0);
+            }
+            displayIssue();
+        }
+
+        function startGame() {
+            currentScore = 0;
+            timeLeft = 30;
+            document.getElementById('score').textContent = currentScore;
+            document.getElementById('progress').style.width = '100%';
+            
+            displayIssue();
+            
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            gameTimer = setInterval(updateTimer, 1000);
+        }
+
+        function getPrizeMessage(score) {
+            if (score >= 300) return "🎉 Congratulations! You've won the Limited Edition Pink Atera T-Shirt + Cap + Water Bottle!";
+            if (score >= 200) return "🎉 Well done! You've won an Atera Cap + Water Bottle!";
+            if (score >= 100) return "🎉 Nice job! You've won an Atera Water Bottle!";
+            return "Keep practicing! Play again to win Atera swag!";
+        }
+
+        function endGame() {
+            clearInterval(gameTimer);
+            document.getElementById('game-interface').style.display = 'none';
+            document.getElementById('game-over').style.display = 'block';
+            document.getElementById('final-score').textContent = currentScore;
+            document.getElementById('prize-message').textContent = getPrizeMessage(currentScore);
+        }
+
+        // Initialize the game automatically
+        window.onload = autoStartGame;
+    </script>
+</body>
+</html>
